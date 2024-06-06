@@ -10,8 +10,8 @@ const token = computed(() => store.getters.userToken)
 const reqData = ref({url: url, cfg: cfg})
 
 onMounted(async () => {
-  store.dispatch('fetchTours', reqData)
-  store.dispatch('getUserToken')
+  store.dispatch('fetchTours', reqData) // перенести в app.vue
+  store.dispatch('getUserToken') // перенести в app.vue
   store.dispatch('fetchUser', reqData)
 })
 </script>
