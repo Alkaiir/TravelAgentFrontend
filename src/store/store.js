@@ -1,4 +1,4 @@
-import {createStore, mapGetters, useStore} from 'vuex'
+import {createStore, mapActions, mapGetters, useStore} from 'vuex'
 import axios from "axios";
 import router from "../router/router.js";
 
@@ -86,7 +86,7 @@ export default createStore({
 
         async fetchUser (ctx, reqData) {
 
-            const data = await axios.get(reqData.value.url + 'user', reqData.value.cfg)
+            const data = await axios.get(reqData.url + 'user', reqData.cfg)
                 .then(function (response) {
                     if (response.status === 200) {
                         ctx.commit('updateUserData', response.data)
@@ -102,7 +102,24 @@ export default createStore({
             ctx.commit('getUserToken')
         },
 
+
+       async registration (ctx, reqData){
+
+            const data = await axios.post(reqData.url + 'register', reqData.userData)
+                .then(function (response) {
+                    alert('Вы успешно зарегистрировались')
+                    ctx.commit('updateUserToken', response.data.token.split('|')[1])
+                    document.cookie = encodeURIComponent('travel_user_token') + '=' + encodeURIComponent(response.data.token.split('|')[1])
+                    router.push('/')
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+
+        },
+
         async login (ctx, reqData) {
+
             const data = await axios.post(reqData.url + 'login', reqData.userData)
                 .then(function (response) {
                     if (response.data.message === 'Login Successful') {
@@ -115,6 +132,7 @@ export default createStore({
                 .catch(error => {
                     console.log(error)
                 })
+            this.dispatch('fetchUser', reqData)
         },
 
         async logout (ctx, cfg) {
@@ -133,9 +151,6 @@ export default createStore({
                     console.log(error)
                 })
         },
-
-
-
 
     }
 })
