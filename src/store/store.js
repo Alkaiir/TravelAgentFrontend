@@ -115,7 +115,7 @@ export default createStore({
                 .catch(error =>{
                     console.log(error)
                 })
-
+           this.dispatch('fetchUser', reqData)
         },
 
         async login (ctx, reqData) {

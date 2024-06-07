@@ -4,6 +4,8 @@ import {computed, ref} from 'vue'
 import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 
+const cfg = computed(()=> store.getters.config)
+
 const age = computed(() => {
   const date = new Date()
   const year = date.getFullYear() - 18
@@ -26,11 +28,14 @@ const { values, errors, defineField } = useForm({
     name: yup.string().required(),
     surname: yup.string().required(),
     patronymic: yup.string().required(),
-    date_of_birth: yup.date().required().test('Больше 18 лет', (value) => value <= age), //fix
+    // date_of_birth: yup.date().required().test('Больше 18 лет', (value) => value <= age), //fix
+    date_of_birth: yup.date().required(), //fix
     country: yup.string().required(),
     email: yup.string().email().required(),
-    phone: yup.string().required().min(11).max(11),
-
+    phone: yup.string().required().min(11).max(11).test('Численный номер', (value) => +value > 0),
+    passport_series: yup.string().required().min(4).max(4),
+    passport_number: yup.string().required().min(6).max(6),
+    password: yup.string().required().min(6),
   }),
 });
 
@@ -62,6 +67,17 @@ const [phone, phoneAttrs] = defineField('phone', {
   validateOnModelUpdate: false,
 });
 
+const [passport_series, passport_seriesAttrs] = defineField('passport_series', {
+  validateOnModelUpdate: false,
+});
+
+const [passport_number, passport_numberAttrs] = defineField('passport_number', {
+  validateOnModelUpdate: false,
+});
+
+const [password, passwordAttrs] = defineField('password', {
+  validateOnModelUpdate: false,
+});
 
 const store = useStore()
 const userData = ref({
@@ -71,22 +87,20 @@ const userData = ref({
   date_of_birth: date_of_birth,
   country: country,
   email: email,
-  phone: phone,
-  passport_series: null,
-  passport_number: null,
-  password: null,
-  repeat_password: null,
+  telephone_number: phone,
+  passport_series: passport_series,
+  passport_number: passport_number,
+  password: password,
 })
 const url = computed(() => store.getters.url)
 
-const reqData = ref({userData: userData, url: url})
+const reqData = ref({userData: userData, url: url, cfg: cfg})
 
 </script>
 
 <template>
   <form class="registration-form-content" onsubmit="return false">
     <h2 class="registration-form-title">Регистрация</h2>
-    <h2 class="registration-form-title">{{ age }}</h2>
     <input type="text" class="registration-form-input" v-model="name" v-bind="nameAttrs" placeholder="Имя">
     <p v-if="errors.name">{{ errors.name }}</p>
     <input type="text" class="registration-form-input" v-model="surname" v-bind="surnameAttrs" placeholder="Фамилия">
@@ -95,20 +109,19 @@ const reqData = ref({userData: userData, url: url})
     <p v-if="errors.patronymic">{{ errors.patronymic }}</p>
     <input type="date" class="registration-form-input" v-model="date_of_birth" v-bind="date_of_birthAttrs">
     <p v-if="errors.date_of_birth">{{ errors.date_of_birth }}</p>
-    <p>{{ date_of_birth }}</p>
     <input type="text" class="registration-form-input" v-model="country" v-bind="countryAttrs" placeholder="Страна">
     <p v-if="errors.country">{{ errors.country }}</p>
     <input type="email" class="registration-form-input" v-model="email" v-bind="emailAttrs" placeholder="Эл. адрес">
     <p v-if="errors.email">{{ errors.email }}</p>
     <input type="tel" class="registration-form-input" v-model="phone" v-bind="phoneAttrs" placeholder="Номер телефона">
     <p v-if="errors.phone">{{ errors.phone }}</p>
-    <p class="passport-input"><input type="tel" class="registration-form-input passport-series" v-model="userData.passport_series" v-bind="countryAttrs" placeholder="Серия">
-      <input type="tel" class="registration-form-input passport-number" v-model="userData.passport_number" v-bind="countryAttrs" placeholder="Номер"></p>
-    <p v-if="errors.country">{{ errors.country }}</p>
-    <p v-if="errors.country">{{ errors.country }}</p>
-    <input type="password" class="registration-form-input" v-model="userData.password" v-bind="countryAttrs" placeholder="Пароль">
-    <input type="password" class="registration-form-input" v-model="userData.repeat_password" v-bind="countryAttrs" placeholder="Повторите пароль">
-    <button class="registration-form-button" @click="store.dispatch('registration', reqData)">Зарегистрироваться</button>
+    <p class="passport-input"><input type="tel" class="registration-form-input passport-series" v-model="passport_series" v-bind="passport_seriesAttrs" placeholder="Серия">
+      <input type="tel" class="registration-form-input passport-number" v-model="passport_number" v-bind="passport_numberAttrs" placeholder="Номер"></p>
+    <p v-if="errors.passport_series">{{ errors.passport_series }}</p>
+    <p v-if="errors.passport_number">{{ errors.passport_number }}</p>
+    <input type="password" class="registration-form-input" v-model="password" v-bind="passwordAttrs" placeholder="Пароль">
+    <p v-if="errors.password">{{ errors.password }}</p>
+    <button class="registration-form-button" @click="store.dispatch('registration', reqData)" :disabled="!(Object.keys(errors).length === 0)">Зарегистрироваться</button>
   </form>
 </template>
 
@@ -151,6 +164,11 @@ const reqData = ref({userData: userData, url: url})
   color: #131313;
   border: 1px solid #131313;
   transition: .5s all;
+}
+
+.registration-form-button:disabled {
+  background: grey;
+  color: #131313;
 }
 
 .passport-input {

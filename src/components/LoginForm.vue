@@ -9,8 +9,6 @@ const cfg = computed(()=> store.getters.config)
 
 const reqData = ref({userData: userData, url: url, cfg: cfg})
 
-const fetchUser = computed(() => store.dispatch('fetchUser', reqData))
-
 </script>
 
 <template>
