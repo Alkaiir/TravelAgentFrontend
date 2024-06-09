@@ -6,14 +6,15 @@ import {computed, onMounted, ref} from "vue";
 
 const store = useStore()
 const cfg = computed(() => store.getters.config)
-const url = computed(() => store.getters.url)
 const token = computed(() => store.getters.userToken)
 
-const reqData = ref({url: url, cfg: cfg})
-
 onMounted(async () => {
-  store.dispatch('fetchTours', reqData)
+  store.dispatch('fetchTours')
   store.dispatch('getUserToken')
+
+  if (token.value !== null && token.value !== undefined) {
+    store.dispatch('fetchUser', cfg.value)
+  }
 })
 </script>
 

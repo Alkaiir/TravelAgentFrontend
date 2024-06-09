@@ -8,6 +8,7 @@ export default createStore({
         user_token: null,
         url: 'http://kursach.test/api/',
         tours: [],
+        sorted_tours: [],
         user_data: null,
     },
     getters: {
@@ -20,7 +21,7 @@ export default createStore({
         },
 
         allTours (state) {
-            return state.tours
+            return state.sorted_tours
         },
 
         userToken (state) {
@@ -48,6 +49,14 @@ export default createStore({
             state.tours = tours
         },
 
+        sortTours (state, sort_cfg = {}) {
+            if (Object.keys(sort_cfg).length === 0) {
+                state.sorted_tours = state.tours
+            }
+
+            // sortirovka
+        },
+
         getUserToken (state) {
 
             function getCookieValue(name)
@@ -68,28 +77,33 @@ export default createStore({
 
         updateUserToken (state, user_token) {
             state.user_token = user_token
-        }
+        },
+
     },
     actions: {
-        async fetchTours (ctx, reqData){
-            const data = await axios.get(reqData.value.url + 'tours')
+
+        getUserToken ({commit, state}) {
+            commit('getUserToken')
+        },
+
+        async fetchTours ({commit, state}){
+            const data = await axios.get(state.url + 'tours')
                 .then(function (response) {
                     const tours = response.data.data
-                    ctx.commit('updateTours', tours)
+                    commit('updateTours', tours)
+                    commit('sortTours')
                 })
                 .catch(error => {
                     console.log(error)
                 })
-
-
         },
 
-        async fetchUser (ctx, reqData) {
+        async fetchUser ({commit, state}, cfg) {
 
-            const data = await axios.get(reqData.url + 'user', reqData.cfg)
+            const data = await axios.get(state.url + 'user', cfg)
                 .then(function (response) {
                     if (response.status === 200) {
-                        ctx.commit('updateUserData', response.data)
+                        commit('updateUserData', response.data)
                     }
                 })
                 .catch(error => {
@@ -98,33 +112,31 @@ export default createStore({
 
         },
 
-        getUserToken (ctx) {
-            ctx.commit('getUserToken')
-        },
 
+       async registration ({commit, state}, reqData){
 
-       async registration (ctx, reqData){
-
-            const data = await axios.post(reqData.url + 'register', reqData.userData)
+            const data = await axios.post(state.url + 'register', reqData.userData)
                 .then(function (response) {
-                    alert('Вы успешно зарегистрировались')
-                    ctx.commit('updateUserToken', response.data.token.split('|')[1])
-                    document.cookie = encodeURIComponent('travel_user_token') + '=' + encodeURIComponent(response.data.token.split('|')[1])
-                    router.push('/')
+                    if (response.data.message === 'User has been registered'){
+                        alert('Вы успешно зарегистрировались')
+                        commit('updateUserToken', response.data.token.split('|')[1])
+                        document.cookie = encodeURIComponent('travel_user_token') + '=' + encodeURIComponent(response.data.token.split('|')[1])
+                        router.push('/')
+                    }
                 })
                 .catch(error =>{
                     console.log(error)
                 })
-           this.dispatch('fetchUser', reqData)
+           this.dispatch('fetchUser', reqData.cfg)
         },
 
-        async login (ctx, reqData) {
+        async login ({commit, state}, reqData) {
 
-            const data = await axios.post(reqData.url + 'login', reqData.userData)
+            const data = await axios.post(state.url + 'login', reqData.userData)
                 .then(function (response) {
                     if (response.data.message === 'Login Successful') {
                         alert('Вы успешно авторизировались')
-                        ctx.commit('updateUserToken', response.data.token.split('|')[1])
+                        commit('updateUserToken', response.data.token.split('|')[1])
                         document.cookie = encodeURIComponent('travel_user_token') + '=' + encodeURIComponent(response.data.token.split('|')[1])
                         router.push('/')
                     }
@@ -135,14 +147,14 @@ export default createStore({
             this.dispatch('fetchUser', reqData)
         },
 
-        async logout (ctx, cfg) {
+        async logout ({commit, state}, cfg) {
 
-            const data = await axios.post('http://kursach.test/api/' + 'logout', null, cfg)
+            const data = await axios.post(state.url + 'logout', null, cfg)
                 .then(function (response) {
                     if (response.data.message === 'Logout Successful') {
                         alert('Вы успешно вышли')
-                        ctx.commit('updateUserToken', null)
-                        ctx.commit('updateUserData', null)
+                        commit('updateUserToken', null)
+                        commit('updateUserData', null)
                         document.cookie = 'travel_user_token' + '=; Max-Age=-99999999;';
                         router.push('/login')
                     }
@@ -151,6 +163,19 @@ export default createStore({
                     console.log(error)
                 })
         },
+
+        async deleteTour ({commit, state}, reqData) {
+
+
+            const data = await axios.delete(state.url + 'tours/' + reqData.id, reqData.cfg)
+                .then(function (response) {
+                    router.push('/tours')
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+            this.dispatch('fetchTours')
+        }
 
     }
 })

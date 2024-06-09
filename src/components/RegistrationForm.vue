@@ -29,7 +29,7 @@ const { values, errors, defineField } = useForm({
     surname: yup.string().required(),
     patronymic: yup.string().required(),
     // date_of_birth: yup.date().required().test('Больше 18 лет', (value) => value <= age), //fix
-    date_of_birth: yup.date().required(), //fix
+    date_of_birth: yup.date().required(),
     country: yup.string().required(),
     email: yup.string().email().required(),
     phone: yup.string().required().min(11).max(11).test('Численный номер', (value) => +value > 0),
@@ -92,9 +92,8 @@ const userData = ref({
   passport_number: passport_number,
   password: password,
 })
-const url = computed(() => store.getters.url)
 
-const reqData = ref({userData: userData, url: url, cfg: cfg})
+const reqData = ref({userData: userData, cfg: cfg})
 
 </script>
 
@@ -121,7 +120,7 @@ const reqData = ref({userData: userData, url: url, cfg: cfg})
     <p v-if="errors.passport_number">{{ errors.passport_number }}</p>
     <input type="password" class="registration-form-input" v-model="password" v-bind="passwordAttrs" placeholder="Пароль">
     <p v-if="errors.password">{{ errors.password }}</p>
-    <button class="registration-form-button" @click="store.dispatch('registration', reqData)" :disabled="!(Object.keys(errors).length === 0)">Зарегистрироваться</button>
+    <button class="registration-form-button" @click="store.dispatch('registration', reqData)" :disabled="!(Object.keys(errors).length === 0) || (Object.keys(userData).length < 9)">Зарегистрироваться</button>
   </form>
 </template>
 
@@ -170,6 +169,13 @@ const reqData = ref({userData: userData, url: url, cfg: cfg})
   background: grey;
   color: #131313;
 }
+
+.registration-form-button:hover:disabled {
+  background: grey;
+  color: black;
+  border: 1px solid white;
+}
+
 
 .passport-input {
   display: flex;

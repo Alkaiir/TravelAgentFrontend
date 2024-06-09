@@ -4,10 +4,9 @@ import {computed, ref} from 'vue'
 
 const store = useStore()
 const userData = ref({email: null, password: null})
-const url = computed(() => store.getters.url)
 const cfg = computed(()=> store.getters.config)
 
-const reqData = ref({userData: userData, url: url, cfg: cfg})
+const reqData = ref({userData: userData})
 
 </script>
 
@@ -16,7 +15,7 @@ const reqData = ref({userData: userData, url: url, cfg: cfg})
     <h2 class="login-form-title">Авторизация</h2>
     <input type="text" class="login-form-input" v-model="userData.email" placeholder="Эл. адрес">
     <input type="password" class="login-form-input" v-model="userData.password" placeholder="Пароль">
-    <button class="login-form-button" @click="store.dispatch('login', reqData);">Войти</button>
+    <button class="login-form-button" @click="store.dispatch('login', reqData); store.dispatch('fetchUser', cfg)">Войти</button>
   </form>
 </template>
 
