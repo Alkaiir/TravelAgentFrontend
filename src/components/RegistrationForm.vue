@@ -28,7 +28,6 @@ const { values, errors, defineField } = useForm({
     name: yup.string().required(),
     surname: yup.string().required(),
     patronymic: yup.string().required(),
-    // date_of_birth: yup.date().required().test('Больше 18 лет', (value) => value <= age), //fix
     date_of_birth: yup.date().required(),
     country: yup.string().required(),
     email: yup.string().email().required(),
@@ -94,7 +93,6 @@ const userData = ref({
 })
 
 const reqData = ref({userData: userData, cfg: cfg})
-
 </script>
 
 <template>

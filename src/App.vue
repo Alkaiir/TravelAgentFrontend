@@ -8,8 +8,6 @@ const store = useStore()
 const cfg = computed(() => store.getters.config)
 const token = computed(() => store.getters.userToken)
 
-
-
 onMounted(async () => {
   store.dispatch('fetchTours')
   store.dispatch('getUserToken')
@@ -27,5 +25,4 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-
 </style>

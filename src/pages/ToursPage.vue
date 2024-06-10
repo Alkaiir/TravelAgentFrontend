@@ -2,6 +2,8 @@
 import { useStore } from 'vuex'
 import {computed, ref} from "vue";
 import TourCard from "../components/TourCard.vue";
+import {useForm} from "vee-validate";
+import * as yup from "yup";
 
 const token = computed(() => store.getters.userToken)
 const userRole = computed(() => store.getters.userRole)
@@ -22,14 +24,54 @@ function switchCreatingMode () {
   }
 }
 
+const { values, errors, defineField } = useForm({
+  validationSchema: yup.object({
+    name: yup.string().required(),
+    country: yup.string().required(),
+    description: yup.string().required(),
+    starting_date: yup.string().required(),
+    days_count: yup.number().required().min(1),
+    peoples_count: yup.number().required().min(1),
+    price: yup.number().required().min(1),
+  }),
+});
+
+const [name, nameAttrs] = defineField('name', {
+  validateOnModelUpdate: false,
+});
+
+const [country, countryAttrs] = defineField('country', {
+  validateOnModelUpdate: false,
+});
+
+const [description, descriptionAttrs] = defineField('description', {
+  validateOnModelUpdate: false,
+});
+
+const [starting_date, starting_dateAttrs] = defineField('starting_date', {
+  validateOnModelUpdate: false,
+});
+
+const [days_count, days_countAttrs] = defineField('days_count', {
+  validateOnModelUpdate: false,
+});
+
+const [peoples_count, peoples_countAttrs] = defineField('peoples_count', {
+  validateOnModelUpdate: false,
+});
+
+const [price, priceAttrs] = defineField('price', {
+  validateOnModelUpdate: false,
+});
+
 let tour = ref ({
-  name: null,
-  country: null,
-  description: null,
-  starting_date: null,
-  days_count: null,
-  peoples_count: null,
-  price: null,
+  name: name,
+  country: country,
+  description: description,
+  starting_date: starting_date,
+  days_count: days_count,
+  peoples_count: peoples_count,
+  price: price,
 })
 
 const cfg = computed(()=> store.getters.config)
@@ -43,7 +85,6 @@ let sortConfig = ref({
   peoples_count: null,
   sortPattern: null,
 })
-
 </script>
 
 <template>
@@ -72,24 +113,31 @@ let sortConfig = ref({
             <option value="5">5 человек</option>
           </select>
         </div>
-        <button @click="store.commit('sortTours', sortConfig)">Найти тур</button>
+        <button @click="store.commit('sortTours', sortConfig); sortConfig = {country: null, starting_date: null, days_count: null, peoples_count: null, sortPattern: null,}" class="inputs-bar-button">Найти тур</button>
       </div>
     </div>
     <div class="creating-menu" v-if="creatingMode === true">
       <p class="editing-menu-desc">Название</p>
-      <input type="text" v-model="tour.name" class="editing-menu-input">
+      <input type="text" v-model="name" v-bind="nameAttrs" class="editing-menu-input">
+      <p v-if="errors.name">{{ errors.name }}</p>
       <p class="editing-menu-desc">Страна</p>
-      <input type="text" v-model="tour.country" class="editing-menu-input">
+      <input type="text" v-model="country" v-bind="countryAttrs" class="editing-menu-input">
+      <p v-if="errors.country">{{ errors.country }}</p>
       <p class="editing-menu-desc">Описание</p>
-      <input type="text" v-model="tour.description" class="editing-menu-input">
+      <input type="text" v-model="description" v-bind="descriptionAttrs" class="editing-menu-input">
+      <p v-if="errors.description">{{ errors.description }}</p>
       <p class="editing-menu-desc">Дата отправления</p>
-      <input type="date" v-model="tour.starting_date" class="editing-menu-input">
+      <input type="date" v-model="starting_date" v-bind="starting_dateAttrs" class="editing-menu-input">
+      <p v-if="errors.starting_date">{{ errors.starting_date }}</p>
       <p class="editing-menu-desc">Количество дней</p>
-      <input type="number" v-model="tour.days_count" class="editing-menu-input">
+      <input type="number" v-model="days_count" v-bind="days_countAttrs" class="editing-menu-input">
+      <p v-if="errors.days_count">{{ errors.days_count }}</p>
       <p class="editing-menu-desc">Количество человек</p>
-      <input type="number" v-model="tour.peoples_count" class="editing-menu-input">
+      <input type="number" v-model="peoples_count" v-bind="peoples_countAttrs" class="editing-menu-input">
+      <p v-if="errors.peoples_count">{{ errors.peoples_count }}</p>
       <p class="editing-menu-desc">Цена</p>
-      <input type="number" v-model="tour.price" class="editing-menu-input">
+      <input type="number" v-model="price" v-bind="priceAttrs" class="editing-menu-input">
+      <p v-if="errors.price">{{ errors.price }}</p>
       <button class="tour-card-route-link" @click="store.dispatch('createTour', reqData)">Создать</button>
     </div>
 
@@ -116,6 +164,22 @@ let sortConfig = ref({
 </template>
 
 <style scoped>
+
+.inputs-bar-button {
+  padding: 12px 42px;
+  background: #131313;
+  color: white;
+  font-size: 32px;
+  border-radius: 25px;
+  border: 1px solid white;
+}
+
+.inputs-bar-button:hover {
+  border: 1px solid black;
+  background: white;
+  color: #131313;
+  transition: .3s all;
+}
 
 .editing-menu-desc {
   font-size: 24px;
@@ -182,12 +246,15 @@ let sortConfig = ref({
 }
 
 .inputs-bar > input {
+  font-size: 24px;
   border: none;
   padding: 8px 20px;
   height: 43px;
 }
 
 .inputs-bar > select {
+  font-size: 24px;
+  border: none;
   padding: 8px 20px;
   height: 43px;
 }

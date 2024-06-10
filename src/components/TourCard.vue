@@ -2,6 +2,8 @@
 import { useStore } from 'vuex'
 import router from "../router/router.js";
 import {computed, ref} from "vue";
+import {useForm} from "vee-validate";
+import * as yup from "yup";
 const store = useStore()
 
 const token = computed(() => store.getters.userToken)
@@ -23,6 +25,45 @@ function switchEditingMode () {
   }
 }
 
+const { values, errors, defineField } = useForm({
+  validationSchema: yup.object({
+    name: yup.string().required(),
+    country: yup.string().required(),
+    description: yup.string().required(),
+    starting_date: yup.string().required(),
+    days_count: yup.number().required().min(1),
+    peoples_count: yup.number().required().min(1),
+    price: yup.number().required().min(1),
+  }),
+});
+
+const [name, nameAttrs] = defineField('name', {
+  validateOnModelUpdate: false,
+});
+
+const [country, countryAttrs] = defineField('country', {
+  validateOnModelUpdate: false,
+});
+
+const [description, descriptionAttrs] = defineField('description', {
+  validateOnModelUpdate: false,
+});
+
+const [starting_date, starting_dateAttrs] = defineField('starting_date', {
+  validateOnModelUpdate: false,
+});
+
+const [days_count, days_countAttrs] = defineField('days_count', {
+  validateOnModelUpdate: false,
+});
+
+const [peoples_count, peoples_countAttrs] = defineField('peoples_count', {
+  validateOnModelUpdate: false,
+});
+
+const [price, priceAttrs] = defineField('price', {
+  validateOnModelUpdate: false,
+});
 </script>
 
 <template>
@@ -57,19 +98,26 @@ function switchEditingMode () {
 </div>
   <div class="editing-menu" v-if="editingMode">
     <p class="editing-menu-desc">Название</p>
-    <input type="text" v-model="tour.name" class="editing-menu-input">
+    <input type="text" v-model="name" v-bind="nameAttrs" class="editing-menu-input">
+    <p v-if="errors.name">{{ errors.name }}</p>
     <p class="editing-menu-desc">Страна</p>
-    <input type="text" v-model="tour.country" class="editing-menu-input">
+    <input type="text" v-model="country" v-bind="countryAttrs" class="editing-menu-input">
+    <p v-if="errors.country">{{ errors.country }}</p>
     <p class="editing-menu-desc">Описание</p>
-    <input type="text" v-model="tour.description" class="editing-menu-input">
+    <input type="text" v-model="description" v-bind="descriptionAttrs" class="editing-menu-input">
+    <p v-if="errors.description">{{ errors.description }}</p>
     <p class="editing-menu-desc">Дата отправления</p>
-    <input type="date" v-model="tour.starting_date" class="editing-menu-input">
+    <input type="date" v-model="starting_date" v-bind="descriptionAttrs" class="editing-menu-input">
+    <p v-if="errors.starting_date">{{ errors.starting_date }}</p>
     <p class="editing-menu-desc">Количество дней</p>
-    <input type="number" v-model="tour.days_count" class="editing-menu-input">
+    <input type="number" v-model="days_count" v-bind="descriptionAttrs" class="editing-menu-input">
+    <p v-if="errors.days_count">{{ errors.days_count }}</p>
     <p class="editing-menu-desc">Количество человек</p>
-    <input type="number" v-model="tour.peoples_count" class="editing-menu-input">
+    <input type="number" v-model="peoples_count" v-bind="descriptionAttrs" class="editing-menu-input">
+    <p v-if="errors.peoples_count">{{ errors.peoples_count }}</p>
     <p class="editing-menu-desc">Цена</p>
-    <input type="number" v-model="tour.price" class="editing-menu-input">
+    <input type="number" v-model="price" v-bind="priceAttrs" class="editing-menu-input">
+    <p v-if="errors.price">{{ errors.price }}</p>
     <button class="tour-card-route-link" @click="store.dispatch('updateTour', reqData); switchEditingMode()">Сохранить</button>
   </div>
 </template>

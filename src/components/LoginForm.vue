@@ -1,21 +1,40 @@
 <script setup>
 import { useStore } from 'vuex'
 import {computed, ref} from 'vue'
+import * as yup from 'yup'
+import { useForm } from 'vee-validate'
 
 const store = useStore()
-const userData = ref({email: null, password: null})
 const cfg = computed(()=> store.getters.config)
 
-const reqData = ref({userData: userData})
 
+const { values, errors, defineField } = useForm({
+  validationSchema: yup.object({
+    email: yup.string().email().required(),
+    password: yup.string().required(),
+  }),
+});
+
+const [email, emailAttrs] = defineField('email', {
+  validateOnModelUpdate: false,
+});
+
+const [password, passwordAttrs] = defineField('password', {
+  validateOnModelUpdate: false,
+});
+
+const userData = ref({email: email, password: password})
+const reqData = ref({userData: userData, cfg: cfg})
 </script>
 
 <template>
   <form class="login-form-content" onsubmit="return false">
     <h2 class="login-form-title">Авторизация</h2>
-    <input type="text" class="login-form-input" v-model="userData.email" placeholder="Эл. адрес">
-    <input type="password" class="login-form-input" v-model="userData.password" placeholder="Пароль">
-    <button class="login-form-button" @click="store.dispatch('login', reqData); store.dispatch('fetchUser', cfg)">Войти</button>
+    <input type="text" class="login-form-input" v-model="email" v-bind="emailAttrs" placeholder="Эл. адрес">
+    <p v-if="errors.email">{{ errors.email }}</p>
+    <input type="password" class="login-form-input" v-model="password" v-bind="passwordAttrs" placeholder="Пароль">
+    <p v-if="errors.password">{{ errors.password }}</p>
+    <button class="login-form-button" @click="store.dispatch('login', reqData);">Войти</button>
   </form>
 </template>
 

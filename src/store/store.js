@@ -2,7 +2,6 @@ import {createStore, mapActions, mapGetters, useStore} from 'vuex'
 import axios from "axios";
 import router from "../router/router.js";
 
-
 export default createStore({
     state: {
         user_token: null,
@@ -11,10 +10,15 @@ export default createStore({
         all_bookings: [],
         sorted_tours: [],
         user_data: null,
+        user_bookings: [],
     },
     getters: {
         config (state) {
             return {headers: {"Authorization": 'Bearer '  + state.user_token}}
+        },
+
+        userBookings (state) {
+            return state.user_bookings
         },
 
         url (state) {
@@ -50,6 +54,10 @@ export default createStore({
         }
     },
     mutations: {
+        updateUserBookings (state, user_bookings) {
+            state.user_bookings = user_bookings
+        },
+
         updateTours (state, tours) {
             state.tours = tours
         },
@@ -109,9 +117,8 @@ export default createStore({
                     }
 
                 }
+                router.push('/tours')
             }
-
-
         },
 
         getUserToken (state) {
@@ -124,7 +131,6 @@ export default createStore({
                     return match[2]
                 }
             }
-
             state.user_token = getCookieValue('travel_user_token')
         },
 
@@ -134,7 +140,7 @@ export default createStore({
 
         updateUserToken (state, user_token) {
             state.user_token = user_token
-        },
+        }
 
     },
     actions: {
@@ -199,7 +205,7 @@ export default createStore({
                 .catch(error => {
                     console.log(error)
                 })
-            this.dispatch('fetchUser', reqData)
+            this.dispatch('fetchUser', reqData.cfg)
         },
 
         async logout ({commit, state}, cfg) {
@@ -279,7 +285,6 @@ export default createStore({
         async deleteBooking ({commit, state}, reqData) {
             const data = await axios.delete(state.url + 'bookings/' + reqData.id,  reqData.cfg)
                 .then(function (response) {
-                    router.push('/bookings')
                 })
                 .catch(error => {
                     console.log(error)
@@ -287,17 +292,24 @@ export default createStore({
             this.dispatch('fetchBookings', reqData.cfg)
         },
 
-        async updateBookingStatus ({commit, state}, reqData) {
+        async updateBookingStatus ({commit, state, dispatch}, reqData) {
             const data = await axios.put(state.url + 'bookings/' + reqData.id + '/status', reqData.data, reqData.cfg)
                 .then(function (response) {
-                    router.push('/bookings')
-
+                    dispatch("fetchBookings", reqData.cfg)
                 })
                 .catch(error => {
                     console.log(error)
                 })
-            this.dispatch('fetchBookings', reqData.cfg)
         },
 
+        async fetchUserBookings ({commit, state}, cfg) {
+            const data = await axios.get(state.url + 'bookings', cfg)
+                .then(function (response) {
+                    commit('updateUserBookings', response.data.data)
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        }
     }
 })

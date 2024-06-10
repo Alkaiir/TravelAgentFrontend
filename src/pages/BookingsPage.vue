@@ -12,10 +12,17 @@ onMounted(async () => {
   store.dispatch('fetchBookings', cfg.value)
 })
 
-
+const status = computed(() => {
+  if (booking.status === "Waiting.") {
+    return 'В ожидании'
+  } else if (booking.status === "Your application has been rejected.") {
+    return 'Отклонена'
+  } else if (booking.status === "Your application has been approved.") {
+    return 'Одобрена'
+  }
+})
 
 const bookings = computed(() => store.getters.allBookings)
-
 </script>
 
 <template>

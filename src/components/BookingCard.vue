@@ -1,16 +1,13 @@
 <script setup>
 import { useStore } from 'vuex'
 import {computed, ref} from "vue";
-import router from "../router/router.js";
+
 const store = useStore()
-
 const cfg = computed(()=> store.getters.config)
-
 const props = defineProps(['booking'])
-
 let booking = props.booking
-
 let editingMode = ref(false)
+const role = computed(()=> store.getters.userRole)
 
 const status = computed(() => {
   if (booking.status === "Waiting.") {
@@ -29,6 +26,7 @@ function switchEditingMode () {
     this.editingMode = false
   }
 }
+
 let updatedStatus = ref(null)
 let reqData = ref({cfg: cfg, id: booking.id, data: {status: updatedStatus}})
 </script>
@@ -38,15 +36,15 @@ let reqData = ref({cfg: cfg, id: booking.id, data: {status: updatedStatus}})
   <p class="booking-desc">{{ booking.tour }}</p>
   <p class="booking-desc">{{ booking.user }}</p>
   <div class="booking-buttons">
-    <button class="booking-card-admin-button" @click="store.dispatch('deleteBooking', reqData)"><img src="/src/assets/Delete.png" alt="Delete Icon"></button>
-    <button class="booking-card-admin-button" @click="switchEditingMode()" ><img src="/src/assets/Edit.png" alt="Edit Icon"></button>
+    <button class="booking-card-admin-button" v-if="role === 'user'" @click="store.dispatch('deleteBooking', reqData)"><img src="/src/assets/Delete.png" alt="Delete Icon"></button>
+    <button class="booking-card-admin-button" v-if="role === 'admin'" @click="switchEditingMode()" ><img src="/src/assets/Edit.png" alt="Edit Icon"></button>
     <button class="booking-card-status" >{{ status }}</button>
   </div>
 </div>
   <div class="booking-card-content" v-if="editingMode">
       <p class="editing-label">Статус</p>
       <div class="editing-buttons">
-        <button class="booking-save-button" @click="store.dispatch('updateBookingStatus', reqData)">Сохранить</button>
+        <button class="booking-save-button" @click="store.dispatch('updateBookingStatus', reqData); switchEditingMode()">Сохранить</button>
         <select class="editing-select" name="status" id="status" v-model="updatedStatus">
           <option value="ожидание">Ожидание</option>
           <option value="одобрена">Одобрена</option>

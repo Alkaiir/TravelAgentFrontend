@@ -1,5 +1,4 @@
 <script setup>
-
 import ContentBanner from "../components/ContentBanner.vue";
 import RegistrationForm from "../components/RegistrationForm.vue";
 </script>

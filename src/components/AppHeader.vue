@@ -7,8 +7,6 @@ const store = useStore()
 const token = computed(() => store.getters.userToken)
 const cfg = computed(() => store.getters.config)
 const userRole = computed(() => store.getters.userRole)
-
-
 </script>
 
 <template>
