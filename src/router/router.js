@@ -6,6 +6,7 @@ import MainPage from "../pages/MainPage.vue";
 import ToursPage from "../pages/ToursPage.vue";
 import ProfilePage from "../pages/ProfilePage.vue";
 import TourPage from "../pages/TourPage.vue";
+import BookingsPage from "../pages/BookingsPage.vue";
 
 const routes = [
     {   name: 'main',
@@ -33,6 +34,11 @@ const routes = [
         path: '/profile',
         component: ProfilePage
     },
+    {   name:'bookings',
+        path: '/bookings',
+        component: BookingsPage
+    },
+
 ]
 
 

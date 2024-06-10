@@ -15,7 +15,7 @@ const userRole = computed(() => store.getters.userRole)
 <div class="header-content">
   <img @click="router.push('/')" src="/src/assets/Logo.png" alt="Logo">
   <nav class="nav-links">
-    <router-link v-if="(token !== null ||  token !== undefined) && (userRole === `admin`) && (userRole !== null) " class="nav-link" to="/tours">Брони</router-link>
+    <router-link v-if="(token !== null ||  token !== undefined) && (userRole === `admin`) && (userRole !== null) " class="nav-link" to="/bookings">Брони</router-link>
     <router-link class="nav-link" to="/tours" >Все туры</router-link>
     <router-link v-if="token === null ||  token === undefined" class="nav-link" to="/registration" >Регистрация</router-link>
     <router-link v-if="token === null ||  token === undefined" class="nav-link" to="/login">Войти</router-link>

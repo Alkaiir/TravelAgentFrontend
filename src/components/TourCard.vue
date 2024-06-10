@@ -6,10 +6,22 @@ const store = useStore()
 
 const token = computed(() => store.getters.userToken)
 const props = defineProps(['tour'])
-const url = computed(() => store.getters.url)
 const cfg = computed(()=> store.getters.config)
 const userRole = computed(() => store.getters.userRole)
-const reqData = ref({ cfg: cfg, id: props.tour.id})
+
+let tour = props.tour
+const reqData = ref({ cfg: cfg, tour: tour})
+
+
+let editingMode = ref(false)
+
+function switchEditingMode () {
+  if (this.editingMode === false) {
+    this.editingMode = true
+  } else {
+    this.editingMode = false
+  }
+}
 
 </script>
 
@@ -20,27 +32,75 @@ const reqData = ref({ cfg: cfg, id: props.tour.id})
       <div class="tour-card-info-desc-icons">
       <div class="tour-card-info-desc-icons-item">
         <img src="/src/assets/Nights.png" alt="" class="icons-item-icon">
-        <p class="icons-item-desc">{{ props.tour.days_count }}</p>
+        <p class="icons-item-desc">{{ tour.days_count }}</p>
       </div>
       <div class="tour-card-info-desc-icons-item">
         <img src="/src/assets/Peoples.png" alt="" class="icons-item-icon">
-        <p class="icons-item-desc">{{ props.tour.peoples_count }}</p>
+        <p class="icons-item-desc">{{ tour.peoples_count }}</p>
       </div>
       </div>
-      <p class="tour-card-info-desc-county price">{{ props.tour.price }} ₽</p>
+      <p class="tour-card-info-desc-county price">{{ tour.price }} ₽</p>
   </div>
+
+  <p class="tour-card-tour-desc">
+    {{ tour.name }}
+  </p>
+
   <div class="tour-card-links">
-    <p class="tour-card-date">{{ props.tour.starting_date }}</p>
+    <p class="tour-card-date">{{ tour.starting_date }}</p>
     <div class="tour-card-links-content">
       <button class="tour-card-admin-button" v-if="(token !== null ||  token !== undefined) && (userRole === `admin`) && (userRole !== null) " @click="store.dispatch('deleteTour', reqData)"><img src="/src/assets/Delete.png" alt="Delete Icon"></button>
-      <button class="tour-card-admin-button" v-if="(token !== null ||  token !== undefined) && (userRole === `admin`) && (userRole !== null) "><img src="/src/assets/Edit.png" alt=""></button>
-      <button class="tour-card-route-link" @click="router.push(`tour/${props.tour.id}`);">Подробнее</button>
+      <button class="tour-card-admin-button" v-if="(token !== null ||  token !== undefined) && (userRole === `admin`) && (userRole !== null) " @click="switchEditingMode()" ><img src="/src/assets/Edit.png" alt=""></button>
+      <button class="tour-card-route-link" @click="router.push(`tour/${tour.id}`);">Подробнее</button>
     </div>
   </div>
 </div>
+  <div class="editing-menu" v-if="editingMode">
+    <p class="editing-menu-desc">Название</p>
+    <input type="text" v-model="tour.name" class="editing-menu-input">
+    <p class="editing-menu-desc">Страна</p>
+    <input type="text" v-model="tour.country" class="editing-menu-input">
+    <p class="editing-menu-desc">Описание</p>
+    <input type="text" v-model="tour.description" class="editing-menu-input">
+    <p class="editing-menu-desc">Дата отправления</p>
+    <input type="date" v-model="tour.starting_date" class="editing-menu-input">
+    <p class="editing-menu-desc">Количество дней</p>
+    <input type="number" v-model="tour.days_count" class="editing-menu-input">
+    <p class="editing-menu-desc">Количество человек</p>
+    <input type="number" v-model="tour.peoples_count" class="editing-menu-input">
+    <p class="editing-menu-desc">Цена</p>
+    <input type="number" v-model="tour.price" class="editing-menu-input">
+    <button class="tour-card-route-link" @click="store.dispatch('updateTour', reqData); switchEditingMode()">Сохранить</button>
+  </div>
 </template>
 
 <style scoped>
+
+.tour-card-tour-desc {
+  font-size: 24px;
+}
+
+.editing-menu {
+  border: 1px solid black;
+  padding: 25px 40px;
+  border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.editing-menu-input {
+  padding: 8px 70px;
+  border-radius: 15px;
+  font-size: 24px;
+  width: 100%;
+  text-align: left;
+}
+
+.editing-menu-desc {
+  font-size: 24px;
+}
+
 .tour-card-content {
   border: 1px solid black;
   border-radius: 25px;
